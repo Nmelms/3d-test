@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
@@ -6,6 +6,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 function Model() {
   const modelRef = useRef();
+  const shouldRotateRef = useRef(true);
 
   useEffect(() => {
     // Scene setup
@@ -24,6 +25,15 @@ function Model() {
     document.body.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
+    controls.addEventListener("start", () => {
+      shouldRotateRef.current = false;
+    });
+
+    // Event listener for when user stops interacting
+    controls.addEventListener("end", () => {
+      shouldRotateRef.current = true;
+    });
+
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
@@ -84,7 +94,7 @@ function Model() {
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
-      if (modelRef.current) {
+      if (modelRef.current && shouldRotateRef.current) {
         modelRef.current.rotation.y += 0.01;
       }
       controls.update();
